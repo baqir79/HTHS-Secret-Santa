@@ -84,7 +84,7 @@ $userStats = $this->datamod->userStats($id); //get user stats
                                         <td><?= $this->datamod->getPair($group->code, $id, $group->year) ?></td>
                                         <td class="description"><?= $group->description ?></td>
                                         <td>
-                                            <?
+                                            <?php
                                             if ($group->year == $current_year) { //only show buttons if its a current year group
                                                 $disabled = $group->owner != $id ? 'disabled' : ''; //disable edit button if not group owner
                                                 echo "<button type='button' class='btn btn-warning grp-edit {$disabled}''>Edit</button>";

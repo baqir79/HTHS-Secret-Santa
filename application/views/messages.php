@@ -40,28 +40,33 @@ $id = $this->session->userdata('id'); //set id for use
                                         <th>Group Name</th>
                                         <th>With</th>
                                         <th>Role</th>
-                                        <th>Preview</th>
+                                        <th>Newest Message</th>
                                         <th>Date</th>
+                                        <th>Options</th>
                                     </tr>
                                     <?php
-                                    foreach ($messages_array as $message) {
-                                    if ($message->year == $year) {
+                                    foreach ($threads as $thread) {
+                                    if ($thread->year == $year) {
                                     $count = true;
                                     // TODO: clean up message view echo statements
                                     ?>
-                                    <tr class="<?php echo "unread" ? $message->is_unread==true : "" ?>">
+                                    <tr class="<?php echo "unread" ? $thread->is_unread==true : "" ?>">
                                         <td class="groupname"><i><?= $group_name=""//lookup group name ?></i></td>
-                                        <td class="groupcode"><?= $message->group_code ?></td>
+                                        <td class="groupcode"><?= $thread->group_code ?></td>
                                         <td class="with"></td>
                                         <td class="role"></td>
-                                        <td class="preview"><?= $message->message?></td>
-                                        <td class="timestamp"><?= $message->timestamp?></td>
+                                        <td class="preview"><?= $thread->message?></td>
+                                        <td class="timestamp"><?= $thread->timestamp?></td>
+                                        <td class="options">
+                                            <a class="btn btn-primary" href="<?=base_url("messsages/view/{$thread->code}")?>">View Thread</a>
+                                            <a class="btn btn-primary" href="<?=base_url("messages/markRead/{$thread->code}")?>">Mark As Read</a>
+                                        </td>
                                             <?
                                             echo '</tr>';
                                             }
                                             }
                                             if ($count == false) {//if no groups exist
-                                                echo "<tr><td colspan='4'>there doesn't seem to be anything here...</td></tr>";
+                                                echo "<tr><td colspan='7'>there doesn't seem to be anything here...</td></tr>";
                                                 echo '</table></div>';
                                             }
                                             $year++;

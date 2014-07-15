@@ -15,6 +15,8 @@ class Messagesmod extends CI_Model {
         parent::__construct();
 
         $this->current_year = intval(date('Y')); //set the current year for group operations
+
+
     }
 
     /**
@@ -23,12 +25,16 @@ class Messagesmod extends CI_Model {
      * @return mixed
      */
     public function listThreads($user_id) {
-        return $this->db->select('message_id, year, code, message, read, MAX(timestamp)')
+        $results = $this->db->select('message_id, year, group_code, message, is_read, MAX(timestamp) as timestamp')
             ->from('messages')
             ->where('to_user_id', $user_id)
             ->or_where('from_user_id', $user_id)
             ->group_by('year, group_code')
             ->get()->result();
+        foreach ($results as &$result) {
+            $result->timestamp = $this->__formatDate($result->timestamp);
+        }
+        return $results;
     }
 
     /**
@@ -38,7 +44,7 @@ class Messagesmod extends CI_Model {
      * @param $code
      * @return mixed
      */
-    public function markAsRead($user_id, $year, $code)
+    public function markAsRead($user_id, $year=null, $code)
     {
         if ($year == null) $year = $this->current_year;
         return $this->db->update('messages', array('is_read' => true), array('to_user_id' => $user_id, 'year' => $year, 'group_code' => $code));
@@ -65,7 +71,7 @@ class Messagesmod extends CI_Model {
      * @param $code
      * @return mixed
      */
-    public function getThread($user_id, $year, $code) {
+    public function getThread($user_id, $year=null, $code) {
         if ($year == null) $year = $this->current_year;
         return $this->db->select('*')
             ->from('messages')
@@ -74,16 +80,16 @@ class Messagesmod extends CI_Model {
             ->get()->result();
     }
 
-    public function send($from_id, $to_id, $year, $code, $message) {
+    public function send($from_id, $to_id, $year=null, $code, $message) {
         if ($year == null) $year = $this->current_year;
         $success = $this->db->insert('messages', array('from_user_id' => $from_id, 'to_user_id' => $to_id, 'year' => $year, 'group_code' => $code, 'message' => $message));
 
         if (!$success) return false;
 
-        return $this->sendNotificationEmail($to_id);
+        return $this->__sendNotificationEmail($to_id);
     }
 
-    private function sendNotificationEmail($to_id)
+    private function __sendNotificationEmail($to_id)
     {
         $this->load->library('email');
         $subject = "You have a new Secret Santa private message!";
@@ -96,11 +102,15 @@ class Messagesmod extends CI_Model {
 
         $this->email->from($this->config->item('email_from_name'),
             $this->config->item('email_from_email'));
-        $this->email->to($to); // TODO: get recipient email
+        $this->email->to($to_id); // TODO: get recipient email
         $this->email->subject($subject);
         $this->email->message($message);
 
         return $this->email->send();
+    }
+
+    private function __formatDate($timestamp) {
+        return date('M j, Y g:i A', mysql_to_unix($timestamp));
     }
 
 }

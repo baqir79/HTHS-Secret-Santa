@@ -12,6 +12,7 @@
 
     <div class="navbar-collapse collapse" style="overflow: hidden;">
         <?php
+        $newMessageCount = 0;
         $navbar = array(
             /**
              * Item settings
@@ -26,6 +27,7 @@
              */
             array('text'=>'About', 'route'=>'about', 'side'=>'left', 'auth'=>false, 'admin'=>false, 'auth_hide'=>false),
             array('text'=>'Discover', 'route'=>'discover', 'side'=>'left', 'auth'=>true, 'admin'=>false, 'auth_hide'=>false),
+            array('text'=>'Messages ('.$newMessageCount.')', 'route'=>'messages', 'side'=>'right', 'auth'=>true, 'admin'=>false, 'auth_hide'=>false),
             array('text'=>'Admin Panel', 'route'=>'admin', 'side'=>'right', 'auth'=>true, 'admin'=>true, 'auth_hide'=>false),
             array('text'=>'Profile', 'route'=>'profile', 'side'=>'right', 'auth'=>true, 'admin'=>false, 'auth_hide'=>false),
             array('text'=>'Logout', 'route'=>'logout', 'side'=>'right', 'auth'=>true, 'admin'=>false, 'auth_hide'=>false),
@@ -57,7 +59,7 @@
             <?php
             if ($is_logged_in) {
                 echo '<li><a id="navbar-greeting">Hi ' . $this->session->userdata('fname') . '!</a></li>';
-                echo '<li><a href="' . base_url('messages') . '">Messages (' . $newMessageCount . ')</li>';
+                //echo '<li><a href="' . base_url('messages') . '">Messages (' . $newMessageCount . ')</li>';
             }
             echo $navbar_html['right'];
             ?>

@@ -636,10 +636,11 @@ class Datamod extends CI_Model
     }
 
     ///DISCOVER GROUPS
-    public function listTrendingGroups()
+    public function listTrendingGroups($year = null)
     {
+        if ($year == null) $year = $this->current_year;
         $data = false;
-        foreach ($this->db->order_by("name", "asc")->get_where('groups', array("private" => 0), 10)->result() as $row) {
+        foreach ($this->db->order_by("name", "asc")->get_where('groups', array("private" => 0, "year" => $year), 10)->result() as $row) {
             $data[] = $row;
         }
         return $data;

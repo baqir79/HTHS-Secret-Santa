@@ -1,19 +1,32 @@
 -- phpMyAdmin SQL Dump
--- version 3.4.10.1deb1
+-- version 4.0.4
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Dec 02, 2013 at 06:30 PM
--- Server version: 5.5.32
--- PHP Version: 5.3.10-1ubuntu3.8
+-- Generation Time: Jul 15, 2014 at 08:18 AM
+-- Server version: 5.6.12-log
+-- PHP Version: 5.4.12
 
 SET FOREIGN_KEY_CHECKS=0;
-SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
 --
 -- Database: `hthssecretsanta`
 --
+CREATE DATABASE IF NOT EXISTS `hthssecretsanta` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+USE `hthssecretsanta`;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `allowed_emails`
+--
+
+CREATE TABLE IF NOT EXISTS `allowed_emails` (
+  `email` varchar(100) NOT NULL,
+  PRIMARY KEY (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -92,6 +105,26 @@ CREATE TABLE IF NOT EXISTS `groups_template` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `messages`
+--
+
+CREATE TABLE IF NOT EXISTS `messages` (
+  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `message_id` int(10) NOT NULL AUTO_INCREMENT,
+  `from_user_id` int(10) NOT NULL,
+  `to_user_id` int(10) NOT NULL,
+  `year` smallint(4) NOT NULL,
+  `group_code` varchar(4) NOT NULL,
+  `message` text NOT NULL,
+  `is_read` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`message_id`),
+  KEY `to_user_id` (`to_user_id`),
+  KEY `from_user_id` (`from_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `pairs`
 --
 
@@ -120,7 +153,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `year_join` smallint(4) NOT NULL,
   `class` tinyint(4) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=105 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=117 ;
 
 -- --------------------------------------------------------
 
@@ -136,17 +169,6 @@ CREATE TABLE IF NOT EXISTS `users_groups` (
   KEY `code` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `allowed_emails`
---
-
-CREATE TABLE IF NOT EXISTS `allowed_emails` (
-  `email` varchar(100) NOT NULL,
-  PRIMARY KEY (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
 --
 -- Constraints for dumped tables
 --
@@ -155,21 +177,28 @@ CREATE TABLE IF NOT EXISTS `allowed_emails` (
 -- Constraints for table `groups_owner`
 --
 ALTER TABLE `groups_owner`
-ADD CONSTRAINT `groups_owner_ibfk_2` FOREIGN KEY (`owner`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-ADD CONSTRAINT `groups_owner_ibfk_1` FOREIGN KEY (`code`) REFERENCES `groups` (`code`) ON DELETE CASCADE ON UPDATE CASCADE;
+ADD CONSTRAINT `groups_owner_ibfk_1` FOREIGN KEY (`code`) REFERENCES `groups` (`code`) ON DELETE CASCADE ON UPDATE CASCADE,
+ADD CONSTRAINT `groups_owner_ibfk_2` FOREIGN KEY (`owner`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `messages`
+--
+ALTER TABLE `messages`
+ADD CONSTRAINT `messages_ibfk_2` FOREIGN KEY (`to_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+ADD CONSTRAINT `messages_ibfk_3` FOREIGN KEY (`from_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `pairs`
 --
 ALTER TABLE `pairs`
-ADD CONSTRAINT `pairs_ibfk_3` FOREIGN KEY (`receive`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
 ADD CONSTRAINT `pairs_ibfk_1` FOREIGN KEY (`code`) REFERENCES `groups` (`code`) ON DELETE CASCADE ON UPDATE CASCADE,
-ADD CONSTRAINT `pairs_ibfk_2` FOREIGN KEY (`give`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ADD CONSTRAINT `pairs_ibfk_2` FOREIGN KEY (`give`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+ADD CONSTRAINT `pairs_ibfk_3` FOREIGN KEY (`receive`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `users_groups`
 --
 ALTER TABLE `users_groups`
-ADD CONSTRAINT `users_groups_ibfk_2` FOREIGN KEY (`code`) REFERENCES `groups` (`code`) ON DELETE CASCADE ON UPDATE CASCADE,
-ADD CONSTRAINT `users_groups_ibfk_1` FOREIGN KEY (`id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ADD CONSTRAINT `users_groups_ibfk_1` FOREIGN KEY (`id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+ADD CONSTRAINT `users_groups_ibfk_2` FOREIGN KEY (`code`) REFERENCES `groups` (`code`) ON DELETE CASCADE ON UPDATE CASCADE;
 SET FOREIGN_KEY_CHECKS=1;

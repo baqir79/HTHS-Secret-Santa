@@ -139,7 +139,7 @@
 
             <div style="margin:0 auto 0 auto;"><?php echo $timer; ?></div>
             <div class="section-header register-header">There are
-                currently <?php $total = $this->datamod->countUsersYear();
+                currently <?php $total = $this->datamod->countUsers();
                 echo $total ?> secret santas.
             </div>
 

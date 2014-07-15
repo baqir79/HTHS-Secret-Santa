@@ -50,7 +50,7 @@
         <h2> Special thanks... </h2>
 
         <ul>
-            <li><b> Developers:</b> Vincent Chen (Sr.); Matt Hsu (Sr.); Zachary Liu(Sr.)</li>
+            <li><b> Developers:</b>  Matt Hsu (2014 Alum); Zachary Liu (2014 Alum); Vincent Chen (2014 Alum);</li>
         </ul>
     </div>
 

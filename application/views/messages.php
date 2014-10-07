@@ -15,7 +15,11 @@ $id = $this->session->userdata('id'); //set id for use
                     <div class="row">
                         <h3>Messages</h3>
                         <p>Send messages anonymously to your group partners to determine their interests! This feature is only available when partners are assigned.</p>
+
                         <div class="container">
+                            <div class="row">
+                                <a class="btn btn-primary" href="<?=base_url("messages/compose")?>">Compose Message</a>
+                            </div>
                             <ul id="years" class="nav nav-tabs">
                                 <?php
                                 $year = $first_year; //don't override first_year variable
@@ -50,7 +54,7 @@ $id = $this->session->userdata('id'); //set id for use
                                     $count = true;
                                     // TODO: clean up message view echo statements
                                     ?>
-                                    <tr class="<?php echo "unread" ? $thread->is_unread==true : "" ?>">
+                                    <tr class="<?php echo $thread->is_read==false ? "unread" : "" ?>">
                                         <td class="groupname"><i><?= $group_name=""//lookup group name ?></i></td>
                                         <td class="groupcode"><?= $thread->group_code ?></td>
                                         <td class="with"></td>
@@ -58,8 +62,8 @@ $id = $this->session->userdata('id'); //set id for use
                                         <td class="preview"><?= $thread->message?></td>
                                         <td class="timestamp"><?= $thread->timestamp?></td>
                                         <td class="options">
-                                            <a class="btn btn-primary" href="<?=base_url("messsages/view/{$thread->code}")?>">View Thread</a>
-                                            <a class="btn btn-primary" href="<?=base_url("messages/markRead/{$thread->code}")?>">Mark As Read</a>
+                                            <a class="btn btn-primary" href="<?=base_url("messsages/view/{$thread->group_code}")?>">View Thread</a>
+                                            <a class="btn btn-primary" href="<?=base_url("messages/markRead/{$thread->group_code}")?>">Mark As Read</a>
                                         </td>
                                             <?
                                             echo '</tr>';

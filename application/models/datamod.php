@@ -434,6 +434,22 @@ class Datamod extends CI_Model
         } else return '[pending]';
     }
 
+    /**
+     * get the id of a user's pair
+     * @param $code
+     * @param $id
+     * @param null $year
+     */
+    public function getPairId($code, $id, $year = NULL) {
+        if ($year == NULL) $year = $this->current_year;
+        $this->db->select('receive');
+        $query = $this->db->get_where('pairs', array('code' => $code, 'give' => $id, 'year' => $year));
+        if ($query->num_rows() > 0) {
+            $row = $query->row();
+            return $row->receive;
+        } else return -1;
+    }
+
     public function getGroupOwner($code, $year = NULL)
     {
         if ($year == NULL) $year = $this->current_year;
@@ -473,7 +489,7 @@ class Datamod extends CI_Model
      * @param string $charset charset of string
      * @return string               random string
      */
-    private function __randstring($len, $charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789')
+    private function __randstring($len, $charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
     {
         $str = '';
         $count = strlen($charset);

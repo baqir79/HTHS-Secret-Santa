@@ -15,7 +15,7 @@ class Messagesmod extends CI_Model {
         parent::__construct();
 
         $this->current_year = intval(date('Y')); //set the current year for group operations
-
+        $this->load->helper('date');
 
     }
 
@@ -23,14 +23,17 @@ class Messagesmod extends CI_Model {
      * list threads (assumes latest message is thread head)
      * @param $user_id
      * @return mixed
+     * TODO idk how to fix this lol
      */
     public function listThreads($user_id) {
-        $results = $this->db->select('message_id, year, group_code, message, is_read, MAX(timestamp) as timestamp')
-            ->from('messages')
+        $results = $this->db->select('a.message_id, a.year, a.group_code, a.message, a.is_read, a.timestamp')
+            ->from('messages a')
             ->where('to_user_id', $user_id)
             ->or_where('from_user_id', $user_id)
+            ->join("(SELECT MAX(b.timestamp) as timestamp FROM messages b ) m", 'm.timestamp = a.timestamp')
             ->group_by('year, group_code')
             ->get()->result();
+
         foreach ($results as &$result) {
             $result->timestamp = $this->__formatDate($result->timestamp);
         }
@@ -76,7 +79,7 @@ class Messagesmod extends CI_Model {
         return $this->db->select('*')
             ->from('messages')
             ->where(array('user_id' => $user_id, 'year' => $year, 'group_code' => $code))
-            ->order_by('timestamp', 'desc')
+            ->order_by('timestamp', 'asc')
             ->get()->result();
     }
 

@@ -84,7 +84,7 @@ class Login extends CI_Controller
         'clientId'  =>  $this->config->item('google_client_id'),
         'clientSecret'  =>  $this->config->item('google_client_secret'),
         'redirectUri'   =>  $this->config->item('google_redirect_uri'),
-        'scopes' => array('email'),
+        'scopes' => array('profile','email'),
     ));
 
         if ( ! isset($_GET['code'])) {

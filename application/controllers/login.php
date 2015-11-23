@@ -8,9 +8,12 @@
 class Login extends CI_Controller
 {
     /**
-     * controller index
+     * Openid login
+     * Rename function to index() to use
+     * No longer supported by google as of July, 2015
+     * @deprecated
      */
-    public function index()
+    public function openid()
     {
 
         require(APPPATH . 'classes/openid.php');
@@ -73,9 +76,8 @@ class Login extends CI_Controller
 
     /**
      * Oauth2 compatible login
-     * Rename to index after openid is deprecated
      */
-    public function oauth2()
+    public function index()
     {
         $this->load->model('datamod');
         $this->config->load('oauth');

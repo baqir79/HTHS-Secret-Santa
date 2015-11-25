@@ -13,7 +13,7 @@ class Login extends CI_Controller
      * No longer supported by google as of July, 2015
      * @deprecated
      */
-    public function openid()
+    private function openid()
     {
 
         require(APPPATH . 'classes/openid.php');
@@ -21,9 +21,9 @@ class Login extends CI_Controller
         $openid = new LightOpenID($_SERVER['HTTP_HOST']);
         if (!$openid->mode) {
             // Didn't get login info from the OpenID provider yet / came from the login link
-        $openid->identity = 'https://www.google.com/accounts/o8/id';
-        $openid->required = array('namePerson/first', 'namePerson/last', 'contact/email');
-        header('Location: ' . $openid->authUrl());
+            $openid->identity = 'https://www.google.com/accounts/o8/id';
+            $openid->required = array('namePerson/first', 'namePerson/last', 'contact/email');
+            header('Location: ' . $openid->authUrl());
         } else if ($openid->mode == 'cancel') {
             // The user decided to cancel logging in, so we'll redirect to the home page instead
             redirect('/');
@@ -55,13 +55,13 @@ class Login extends CI_Controller
                         $user_id = $this->datamod->getUserId($email);//@todo addUser should return id
                     }
                     //check for admin permissions
-                    if (in_array($user_data['contact/email'],$this->datamod->getGlobalVar('admin_users'))) //check against imported admin_users.config file
+                    if (in_array($user_data['contact/email'], $this->datamod->getGlobalVar('admin_users'))) //check against imported admin_users.config file
                         $admin = 'true';
                     else
                         $admin = 'false';
 
                     //set session info
-                    $this->session->set_userdata(array('auth' => 'true', 'admin' => $admin, 'fname' => $fname, 'lname' => $lname,'email' => $email, 'id' => $user_id));
+                    $this->session->set_userdata(array('auth' => 'true', 'admin' => $admin, 'fname' => $fname, 'lname' => $lname, 'email' => $email, 'id' => $user_id));
 
                     //if ($this->datamod->getPrivKey($user_id) == false)
                     //redirect(base_url('secretsanta/survey'));
@@ -83,21 +83,27 @@ class Login extends CI_Controller
         $this->config->load('oauth');
 
         $provider = new League\OAuth2\Client\Provider\Google(array(
-        'clientId'  =>  $this->config->item('google_client_id'),
-        'clientSecret'  =>  $this->config->item('google_client_secret'),
-        'redirectUri'   =>  $this->config->item('google_redirect_uri'),
-        'scopes' => array('profile','email'),
-    ));
+            'clientId' => $this->config->item('google_client_id'),
+            'clientSecret' => $this->config->item('google_client_secret'),
+            'redirectUri' => $this->config->item('google_redirect_uri'),
+        ));
 
-        if ( ! isset($_GET['code'])) {
+        if (!empty($_GET['error'])) {
+
+            // Got an error, probably user denied access
+            exit('Got error: ' . $_GET['error']);
+
+        } elseif (!isset($_GET['code'])) {
 
             // If we don't have an authorization code then get one
-            header('Location: '.$provider->getAuthorizationUrl());
+
+            header('Location: ' . $provider->getAuthorizationUrl());
             exit;
             //redirect('/');
 
         } else {
 
+            $this->session->set_userdata('oauth2state', $provider->getState());
             // Try to get an access token (using the authorization code grant)
             $token = $provider->getAccessToken('authorization_code', [
                 'code' => $_GET['code']
@@ -107,12 +113,12 @@ class Login extends CI_Controller
             try {
 
                 // We got an access token, let's now get the user's details
-                $userDetails = $provider->getUserDetails($token);
-                $fname = $userDetails->firstName;
-                $lname = $userDetails->lastName;
-                $email = $userDetails->email;
-                $image = $userDetails->imageUrl;
-                //var_dump($userDetails);
+                $userDetails = $provider->getResourceOwner($token);
+                $fname = $userDetails->getFirstName();
+                $lname = $userDetails->getLastName();
+                $email = $userDetails->getEmail();
+                $image = $userDetails->getAvatar();
+                var_dump($userDetails);
 
                 //check that user is in domain restriction or whitelisted
                 $domain_restriction = $this->datamod->getGlobalVar('domain_restriction');
@@ -125,13 +131,13 @@ class Login extends CI_Controller
                         $user_id = $this->datamod->getUserId($email);//@todo addUser should return id
                     }
                     //check for admin permissions
-                    if (in_array($email,$this->datamod->getGlobalVar('admin_users'))) //check against admin users config
+                    if (in_array($email, $this->datamod->getGlobalVar('admin_users'))) //check against admin users config
                         $admin = 'true';
                     else
                         $admin = 'false';
 
                     //set session info
-                    $this->session->set_userdata(array('auth' => 'true', 'admin' => $admin, 'fname' => $fname, 'lname' => $lname,'email' => $email, 'id' => $user_id, 'image' =>$image));
+                    $this->session->set_userdata(array('auth' => 'true', 'admin' => $admin, 'fname' => $fname, 'lname' => $lname, 'email' => $email, 'id' => $user_id, 'image' => $image));
 
 
                     redirect(base_url('/profile'));
@@ -150,7 +156,7 @@ class Login extends CI_Controller
             //echo $token->accessToken;
 
             // Use this to get a new access token if the old one expires
-           // echo $token->refreshToken;
+            // echo $token->refreshToken;
 
             // Number of seconds until the access token will expire, and need refreshing
             //echo $token->expires;
@@ -165,14 +171,15 @@ class Login extends CI_Controller
     private function login_failure($message = 'Login failure')
     {
         //echo $message;
-        render("landing",array("icon"=>"&#xf071;","header"=>"Login failure","subheader"=>$message));
+        render("landing", array("icon" => "&#xf071;", "header" => "Login failure", "subheader" => $message));
     }
 
     /**
      * login timeout
      */
-    public function timeout(){
-        render("landing",array("icon"=>"&#xf071;","header"=>"Oops! You don't have permission to view this page.","subheader"=>"Your session has expired, or you are not logged in. Please <a href='/login'>login</a> to continue."));
+    public function timeout()
+    {
+        render("landing", array("icon" => "&#xf071;", "header" => "Oops! You don't have permission to view this page.", "subheader" => "Your session has expired, or you are not logged in. Please <a href='/login'>login</a> to continue."));
     }
 
     /**
@@ -181,7 +188,7 @@ class Login extends CI_Controller
     public function logout()
     {
         $this->session->sess_destroy();
-        render("landing",array("icon"=>"&#xf058;","header"=>"Logout success!","subheader"=>"You have successfully been logged out of your account. Come back soon!"));
+        render("landing", array("icon" => "&#xf058;", "header" => "Logout success!", "subheader" => "You have successfully been logged out of your account. Come back soon!"));
     }
 
 }
